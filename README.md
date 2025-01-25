@@ -47,13 +47,13 @@
 ## DIAMOND、END_STONE、STONE、CLOCK...
 可参考：https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
+
+为java端用户菜单子项物品显示做参考
 ## itemDisplayName
 选项名
 
 ## itemDescription
 说明文，je端表现为lore，在be端不显示
-
-为java端用户菜单子项物品显示做参考
 ## itemType
 ```java
 //    向当前使用菜单的玩家发送消息
