@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-maven-
       # Step 4: 构建项目
       - name: Build with Maven
-        run: mvn clean verify
+        run: mvn verify
 
   release:
     needs: build
