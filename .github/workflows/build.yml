@@ -3,12 +3,9 @@ name: Java Maven Build and Release
 on:
   push:
     branches:
-      - main # 监听 main 分支的推送事件
-    tags:
-      - 'refs/tags/*' # 监听所有标签的推送事件
-  pull_request:
-    branches:
       - main
+    tags:
+      - 'refs/tags/*'
 
 jobs:
   build:
@@ -24,7 +21,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21' # 选择你的 Java 版本
+          java-version: '21'
 
       # Step 3: 缓存 Maven 依赖
       - name: Cache Maven dependencies
@@ -39,16 +36,14 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      # Step 5: 从 pom.xml 读取版本号并推送标签
-      - name: Extract project version and create tag
-        id: tag_version
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag "v${VERSION}"
-          git push origin "v${VERSION}"
+      # Step 5: 调试 - 检查目标目录内容
+      - name: Debug: List target directory
+        run: ls -al target
+
+      # Step 6: 动态获取 JAR 文件路径
+      - name: Find JAR file
+        id: jar
+        run: echo "JAR_FILE=$(find target -name '*.jar' | head -n 1)" >> $GITHUB_ENV
 
   release:
     needs: build
@@ -63,6 +58,6 @@ jobs:
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/*.jar # 上传打包后的 Jar 文件
+          files: ${{ env.JAR_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
