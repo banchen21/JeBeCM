@@ -1,11 +1,11 @@
-name: Java Maven Build and Release
+name: Build and Release
 
 on:
   push:
     branches:
       - main
     tags:
-      - 'refs/tags/*'
+      - 'v*' # 触发发布的标签（如 v1.0.0）
 
 jobs:
   build:
@@ -32,30 +32,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 4: 构建项目
+      # Step 4: 构建项目（执行 `mvn verify`）
       - name: Build with Maven
-        run: mvn clean package
+        run: mvn verify
 
-      # Step 5: 调试 - 检查目标目录内容
+      # Step 5: 调试 - 检查 target 目录内容
       - name: Debug: List target directory
         run: ls -al target
 
-      # Step 6: 动态获取 JAR 文件路径
+      # Step 6: 获取 JAR 文件路径并存储到环境变量
       - name: Find JAR file
         id: jar
-        run: echo "JAR_FILE=$(find target -name '*.jar' | head -n 1)" >> $GITHUB_ENV
+        run: |
+          JAR_FILE=$(find target -name '*.jar' | head -n 1)
+          echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') # 仅在标签推送时发布
     steps:
       # Step 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: 发布到 GitHub Releases
-      - name: Upload release
+      # Step 2: 上传到 GitHub Release
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.JAR_FILE }}
