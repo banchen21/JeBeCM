@@ -38,7 +38,8 @@ jobs:
 
       # Step 5: 调试 - 检查 target 目录内容
       - name: Debug: List target directory
-        run: ls -al target
+        run: |
+          ls -al target  # 确保正确显示 target 目录的文件
 
   release:
     needs: build
