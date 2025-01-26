@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*' # 触发发布的标签（如 v1.0.0）
+      - 'v*'  # 触发发布的标签（如 v1.0.0）
 
 jobs:
   build:
@@ -32,34 +32,46 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Step 4: 构建项目（执行 `mvn verify`）
+      # Step 4: 构建项目
       - name: Build with Maven
-        run: mvn verify
+        run: mvn clean verify
 
       # Step 5: 调试 - 检查 target 目录内容
       - name: Debug: List target directory
         run: ls -al target
 
-      # Step 6: 获取 JAR 文件路径并存储到环境变量
-      - name: Find JAR file
-        id: jar
-        run: |
-          JAR_FILE=$(find target -name '*.jar' | head -n 1)
-          echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
-
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') # 仅在标签推送时发布
     steps:
       # Step 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: 上传到 GitHub Release
-      - name: Upload to GitHub Release
+      # Step 2: 设置 Git 配置
+      - name: Set Git config
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      # Step 3: 从 pom.xml 读取版本号
+      - name: Extract project version
+        id: extract_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      # Step 4: 创建并推送 Git 标签
+      - name: Create and push Git tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag "v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
+
+      # Step 5: 上传发布文件到 GitHub Releases
+      - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.JAR_FILE }}
+          files: target/*.jar # 上传构建后的 JAR 文件
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
