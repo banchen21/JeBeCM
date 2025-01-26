@@ -1,0 +1,54 @@
+name: Java Maven Build and Release
+
+on:
+  push:
+    branches:
+      - main # 监听 main 分支的推送事件
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: 设置 Java 环境
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21' # 选择你的 Java 版本
+
+      # Step 3: 缓存 Maven 依赖（提高构建速度）
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 4: 构建项目
+      - name: Build with Maven
+        run: mvn clean package
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: 发布打包到 GitHub Releases
+      - name: Upload release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/*.jar # 上传打包后的 Jar 文件
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
