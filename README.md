@@ -46,7 +46,7 @@
 
 ## DIAMOND、END_STONE、STONE、CLOCK...
 可参考：https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
- 
+  
 为java端用户菜单子项物品显示做参考
 ## itemDisplayName
 选项名
