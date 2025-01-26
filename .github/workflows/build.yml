@@ -48,10 +48,14 @@ jobs:
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Create and push Git tag
+      - name: Check if tag exists
         run: |
-          git tag "v${{ env.VERSION }}"  # 创建标签
-          git push origin "v${{ env.VERSION }}"  # 推送标签到 GitHub
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "Tag v${{ env.VERSION }} already exists, skipping tag creation.";
+          else
+            git tag "v${{ env.VERSION }}";  # 创建标签
+            git push origin "v${{ env.VERSION }}";  # 推送标签到 GitHub
+          fi
 
       - name: List target directory (release)
         run: ls -al target
