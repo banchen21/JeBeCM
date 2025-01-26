@@ -2,69 +2,63 @@ name: Build and Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'  # 确保触发标签推送事件
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Java
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # Step 3: Cache Maven dependencies
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
 
-      # Step 4: Build the project using Maven
       - name: Build with Maven
-        run: mvn verify
+        run: mvn clean package
 
+      - name: List target directory
+        run: ls -al target
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Git config
       - name: Set Git config
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      # Step 3: Extract version from pom.xml
       - name: Extract version from pom.xml
         id: extract_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # Step 4: Create and push Git tag
       - name: Create and push Git tag
         run: |
-          git tag "v${{ env.VERSION }}"
-          git push
+          git tag "v${{ env.VERSION }}"  # 创建标签
+          git push origin "v${{ env.VERSION }}"  # 推送标签到 GitHub
 
-      # Step 5: Upload release to GitHub Releases
+      - name: List target directory (release)
+        run: ls -al target
+
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/*.jar  # Ensure the JAR is uploaded
+          files: target/*.jar  # 上传 JAR 文件
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
