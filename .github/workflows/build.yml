@@ -2,67 +2,72 @@ name: Build and Release
 
 on:
   push:
+    branches:
+      - main   # 监听 main 分支的推送
     tags:
-      - 'v*'  # 确保触发标签推送事件
+      - 'v*'   # 监听以 v 开头的标签推送（例如 v1.0.0）
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: 设置 JDK 环境
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      # Step 3: 缓存 Maven 依赖
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
+      # Step 4: 使用 Maven 构建项目
       - name: Build with Maven
         run: mvn clean package
 
-      - name: List target directory
+      # Step 5: 调试 - 列出 target 目录中的文件
+      - name: List files in target directory
         run: ls -al target
 
   release:
-    needs: build
+    needs: build  # 依赖于 build job
     runs-on: ubuntu-latest
     steps:
+      # Step 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: 设置 Git 配置
       - name: Set Git config
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
+      # Step 3: 从 pom.xml 中提取版本号
       - name: Extract version from pom.xml
         id: extract_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Check if tag exists
+      # Step 4: 创建 Git 标签并推送（如果不存在）
+      - name: Create and push Git tag
         run: |
-          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Tag v${{ env.VERSION }} already exists, skipping tag creation.";
-          else
-            git tag "v${{ env.VERSION }}";  # 创建标签
-            git push origin "v${{ env.VERSION }}";  # 推送标签到 GitHub
-          fi
+          git tag "v${{ env.VERSION }}" || echo "Tag v${{ env.VERSION }} already exists, skipping tag creation."
+          git push origin "v${{ env.VERSION }}"
 
-      - name: List target directory (release)
-        run: ls -al target
-
+      # Step 5: 上传构建的 JAR 文件到 GitHub Releases
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/*.jar  # 上传 JAR 文件
+          files: target/*.jar  # 上传构建后的 JAR 文件
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
