@@ -26,7 +26,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21' # 选择你的 Java 版本
 
-      # Step 3: 缓存 Maven 依赖（提高构建速度）
+      # Step 3: 缓存 Maven 依赖
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
@@ -39,35 +39,27 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
+      # Step 5: 从 pom.xml 读取版本号并推送标签
+      - name: Extract project version and create tag
+        id: tag_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
   release:
     needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       # Step 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: 设置 Git 配置
-      - name: Set Git config
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-      # Step 3: 从 pom.xml 读取版本号
-      - name: Extract project version
-        id: extract_version
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      # Step 4: 创建并推送 Git 标签
-      - name: Create and push Git tag
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git tag "v${{ env.VERSION }}"
-          git push origin "v${{ env.VERSION }}"
-
-      # Step 5: 发布到 GitHub Releases
+      # Step 2: 发布到 GitHub Releases
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
