@@ -35,18 +35,13 @@ public final class JeBeCM extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getLogger().info("JeBeCM is enabled!");
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            getDataFolder().mkdirs();
-            getServer().getPluginManager().registerEvents(new CommmandCM(getDataFolder().getPath()), this);
-            init_data();
-            this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-                commands.registrar().register(CommmandCM.createCommand("cm", this, this.getDataFolder().getPath()), "钟表菜单");
-            });
-            getServer().getPluginManager().registerEvents(new CommmandListener(this), this);
-        } else {
-            this.getLogger().warning("Could not find PlaceholderAPI! This plugin is required.");
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
+        getDataFolder().mkdirs();
+        getServer().getPluginManager().registerEvents(new CommmandCM(getDataFolder().getPath()), this);
+        init_data();
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(CommmandCM.createCommand("cm", this, this.getDataFolder().getPath()), "钟表菜单");
+        });
+        getServer().getPluginManager().registerEvents(new CommmandListener(this), this);
     }
 
     private void init_data() {
