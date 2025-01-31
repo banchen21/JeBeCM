@@ -6,7 +6,7 @@
 
     <groupId>org.bc</groupId>
     <artifactId>jebecm</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>jebecm</name>
@@ -42,25 +42,25 @@
                 </executions>
             </plugin>
 
-            <!-- <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <configuration>
-                            <target>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
-                                      tofile="F:\mc_paper_server\plugins/${project.build.finalName}.jar" />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin> -->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-antrun-plugin</artifactId>-->
+<!--                <version>3.1.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <configuration>-->
+<!--                            <target>-->
+<!--                                <copy file="${project.build.directory}/${project.build.finalName}.jar"-->
+<!--                                      tofile="F:\mc_paper_server\plugins/${project.build.finalName}.jar" />-->
+<!--                            </target>-->
+<!--                        </configuration>-->
+<!--                        <goals>-->
+<!--                            <goal>run</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
         </plugins>
         <resources>
@@ -84,6 +84,10 @@
             <id>opencollab-snapshot</id>
             <url>https://repo.opencollab.dev/main/</url>
         </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -103,6 +107,12 @@
             <groupId>org.geysermc.floodgate</groupId>
             <artifactId>api</artifactId>
             <version>2.2.3-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

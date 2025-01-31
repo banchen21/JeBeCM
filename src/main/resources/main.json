@@ -1,0 +1,26 @@
+{
+  "DIAMOND": {
+    "itemDisplayName": "物品名",
+    "itemDescription": "点击设置时间为0",
+    "itemType": "TELL",
+    "itemCommand": "hi"
+  },
+  "END_STONE": {
+    "itemDisplayName": "管理员菜单",
+    "itemDescription": "点击设置时间为0",
+    "itemType": "OP_FORM",
+    "itemCommand": "op_menu.json"
+  },
+  "STONE": {
+    "itemDisplayName": "我的家园",
+    "itemDescription": "点击设置时间为0",
+    "itemType": "FORM",
+    "itemCommand": "main.json"
+  },
+  "CLOCK": {
+    "itemDisplayName": "时间重置",
+    "itemDescription": "点击设置时间为0",
+    "itemType": "COMMAND",
+    "itemCommand": "time set 0"
+  }
+}

@@ -1,6 +1,6 @@
 package org.bc.jeBeCM;
 
-public enum CMType {
+public enum CmType {
 //    tell类型
     TELL,
 //    from 玩家菜单

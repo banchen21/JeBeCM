@@ -1,15 +1,12 @@
 package org.bc.jeBeCM;
 
-import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
-
-public class CM_Item {
+public class CmItem {
     //    选项名
     String itemDisplayName;
     //    物品描述
     String itemDescription;
     //    类型
-    CMType itemType;
+    CmType itemType;
     //    命令
     String itemCommand;
 
@@ -29,11 +26,11 @@ public class CM_Item {
         this.itemDescription = itemDescription;
     }
 
-    public CMType getItemType() {
+    public CmType getItemType() {
         return itemType;
     }
 
-    public void setItemType(CMType itemType) {
+    public void setItemType(CmType itemType) {
         this.itemType = itemType;
     }
 
@@ -45,7 +42,7 @@ public class CM_Item {
         this.itemCommand = itemCommand;
     }
 
-    public CM_Item(String itemDisplayName, String itemDescription, CMType itemType, String itemCommand) {
+    public CmItem(String itemDisplayName, String itemDescription, CmType itemType, String itemCommand) {
         this.itemDisplayName = itemDisplayName;
         this.itemDescription = itemDescription;
         this.itemType = itemType;

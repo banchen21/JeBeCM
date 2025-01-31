@@ -1,7 +1,8 @@
 name: JeBeCM
-version: '1.0-SNAPSHOT'
+version: '1.1-SNAPSHOT'
 main: org.bc.jeBeCM.JeBeCM
 api-version: '1.21'
 authors: [ "banchen21" ]
 description: 一个互通服使用的菜单插件
+depend: [PlaceholderAPI]
 softdepend: ["FloodgateApi","GeyserApi"]

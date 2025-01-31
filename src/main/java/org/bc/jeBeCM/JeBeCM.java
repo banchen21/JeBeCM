@@ -1,69 +1,89 @@
 package org.bc.jeBeCM;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public final class JeBeCM extends JavaPlugin implements Listener {
-
-    public HashMap<Player, Map<Material, CM_Item>> playerMapMap;
-
-    public Map<Player, Map<Material, CM_Item>> getPlayerMapMap() {
+    public static final String LANG_MESSAGES = "lang.messages";
+    public HashMap<Player, Map<Material, CmItem>> playerMapMap;
+    private static Locale locale = Locale.CHINA;
+    public Map<Player, Map<Material, CmItem>> getPlayerMapMap() {
         return this.playerMapMap;
     }
 
-    public void setPlayerMapMap(Player player, Map<Material, CM_Item> materialMap) {
+    public void setPlayerMapMap(Player player, Map<Material, CmItem> materialMap) {
         this.playerMapMap.put(player, materialMap);
     }
 
     @Override
     public void onEnable() {
-        getLogger().info("JeBeCM is enabled!");
         getDataFolder().mkdirs();
-        getServer().getPluginManager().registerEvents(new CommmandCM(getDataFolder().getPath()), this);
-        init_data();
+        saveResource("config.yml", false);
+        saveResource("main.json", false);
+        saveResource("lang/messages_zh_CN.properties", false);
+
+        saveDefaultConfig();
+
+        //        初始化翻译系统
+        setupTranslations(this.getConfig().getString("lang"));
+
+//        检查前置插件
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            Bukkit.getPluginManager().registerEvents(this, this); //
+        } else {
+            getLogger().warning("PlaceholderAPI 没有被加载，插件将不会工作！");
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
+        getServer().getPluginManager().registerEvents(new CommandCM(getDataFolder().getPath()), this);
+        playerMapMap = new HashMap<>();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register(CommmandCM.createCommand("cm", this, this.getDataFolder().getPath()), "钟表菜单");
+            commands.registrar().register(CommandCM.createCommand("cm", this, this.getDataFolder().getPath()), "钟表菜单");
         });
         getServer().getPluginManager().registerEvents(new CommmandListener(this), this);
     }
 
-    private void init_data() {
-        if (!new File(getDataFolder().getPath() + "/main.json").exists()) {
-            Map<Material, CM_Item> cmItemHashMap = new HashMap<>();
-            cmItemHashMap.put(Material.DIAMOND, new CM_Item("物品名", "点击设置时间为0", CMType.TELL, "hi"));
-            cmItemHashMap.put(Material.CLOCK, new CM_Item("时间重置", "点击设置时间为0", CMType.COMMAND, "time set 0"));
-            cmItemHashMap.put(Material.STONE, new CM_Item("我的家园", "点击设置时间为0", CMType.FORM, "home.json"));
-            cmItemHashMap.put(Material.END_STONE, new CM_Item("管理员菜单", "点击设置时间为0", CMType.OP_FORM, "op_menu.json"));
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson(cmItemHashMap);
-            try {
-                FileWriter fileWriter = new FileWriter(getDataFolder().getPath() + "/main.json");
-                fileWriter.append(json);
-                fileWriter.flush();
-                fileWriter.close();
-            } catch (IOException e) {
-                this.getLogger().info("写入失败");
+    private void setupTranslations(@Nullable String language) {
+        TranslationRegistry registry = TranslationRegistry.create(Key.key("labor_value", "translations"));
+        if (language != null) {
+            switch (language) {
+                case "en_US":
+                    locale = Locale.US;
+                    break;
+                case "zh_CN":
+                default:
+                    locale = Locale.CHINA;
+                    break;
             }
+            ResourceBundle default_zhBundle = ResourceBundle.getBundle(LANG_MESSAGES, locale, UTF8ResourceBundleControl.get());
+            registry.registerAll(locale, default_zhBundle, true);
+        } else {
+            locale = Locale.CHINA;
+            ResourceBundle default_zhBundle = ResourceBundle.getBundle(LANG_MESSAGES, locale, UTF8ResourceBundleControl.get());
+            registry.registerAll(locale, default_zhBundle, true);
         }
-        playerMapMap = new HashMap<>();
+        // 将翻译注册到全局翻译器
+        GlobalTranslator.translator().addSource(registry);
     }
+
+    static String getLocalizedMessage(String key) {
+        ResourceBundle bundle = ResourceBundle.getBundle(LANG_MESSAGES, locale, UTF8ResourceBundleControl.get());
+        return bundle.getString(key);
+    }
+
 
     @Override
     public void onDisable() {

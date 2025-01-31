@@ -15,11 +15,11 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import java.util.Objects;
 
-public class CommmandCM implements Listener {
+public class CommandCM implements Listener {
 
     String main_path;
 
-    public CommmandCM(String path) {
+    public CommandCM(String path) {
         this.main_path = path;
     }
 
@@ -51,10 +51,18 @@ public class CommmandCM implements Listener {
     public void onPlayerRightClick(PlayerInteractEvent event) {
         try {
             if (Objects.requireNonNull(event.getItem()).getType().equals(Material.CLOCK)&&event.getAction().isRightClick()) {
-//            以玩家的名义执行命令: /cm help
                 Bukkit.dispatchCommand(event.getPlayer(), "cm help");
             }
-        } catch (NullPointerException ignored) {
+            } catch (NullPointerException ignored) {
+        }
+    }
+
+//    监听玩家进入服务器
+    @EventHandler
+    public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (!player.getInventory().contains(Material.CLOCK)) {
+            player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
         }
     }
 }
