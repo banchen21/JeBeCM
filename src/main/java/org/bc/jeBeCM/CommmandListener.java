@@ -32,6 +32,7 @@ public class CommmandListener implements Listener {
 //            获取玩家
             Player player = (Player) event.getWhoClicked();
             if (itemStack != null) {
+                event.setCancelled(true);
                 Material material = itemStack.getType();
                 CmItem cmItem = plugin.getPlayerMapMap().get(player).get(material);
                 String commandText = PlaceholderAPI.setPlaceholders(player, cmItem.getItemCommand());
@@ -63,7 +64,7 @@ public class CommmandListener implements Listener {
                         break;
                 }
             }
-            event.setCancelled(true);
+            
         }
     }
 
