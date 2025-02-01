@@ -1,6 +1,7 @@
 package org.bc.jeBeCM;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class CmItem {
     //    选项名
@@ -11,6 +12,26 @@ public class CmItem {
     CmType itemType;
     //    命令
     String itemCommand;
+//    url path
+    String FormImage_type;
+
+    String FormImage_data;
+
+    public String getFormImage_data() {
+        return FormImage_data;
+    }
+
+    public void setFormImage_data(String formImage_data) {
+        FormImage_data = formImage_data;
+    }
+
+    public String getFormImage_type() {
+        return FormImage_type;
+    }
+
+    public void setFormImage_type(String formImage_type) {
+        FormImage_type = formImage_type;
+    }
 
     public String getItemDisplayName() {
         return itemDisplayName;
@@ -44,11 +65,13 @@ public class CmItem {
         this.itemCommand = itemCommand;
     }
 
-    public CmItem(String itemDisplayName, String itemDescription, CmType itemType, String itemCommand) {
+    public CmItem(String itemDisplayName, String itemDescription, CmType itemType, String itemCommand, String FormImage_type, String form_data) {
         this.itemDisplayName = itemDisplayName;
         this.itemDescription = itemDescription;
         this.itemType = itemType;
         this.itemCommand = itemCommand;
+        this.FormImage_type = FormImage_type;
+        this.FormImage_data = form_data;
     }
 }
 

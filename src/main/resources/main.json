@@ -3,24 +3,32 @@
     "itemDisplayName": "物品名",
     "itemDescription": "点击设置时间为0",
     "itemType": "TELL",
-    "itemCommand": "hi"
+    "itemCommand": "hi",
+    "FormImage_type": "url",
+    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
   },
   "END_STONE": {
     "itemDisplayName": "管理员菜单",
     "itemDescription": "点击设置时间为0",
     "itemType": "OP_FORM",
-    "itemCommand": "op_menu.json"
+    "itemCommand": "op_menu.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/i/glyph_world_template.png"
   },
   "STONE": {
     "itemDisplayName": "我的家园",
     "itemDescription": "点击设置时间为0",
     "itemType": "FORM",
-    "itemCommand": "main.json"
+    "itemCommand": "main.json",
+    "FormImage_type": "url",
+    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
   },
   "CLOCK": {
     "itemDisplayName": "时间重置",
     "itemDescription": "点击设置时间为0",
     "itemType": "COMMAND",
-    "itemCommand": "time set 0"
+    "itemCommand": "time set 0",
+    "FormImage_type": "url",
+    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
   }
 }
