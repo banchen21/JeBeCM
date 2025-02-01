@@ -58,7 +58,11 @@ public static LinkedHashMap<Material, CmItem> read_json_to_list(String pathname)
         if (materialMap != null) {
             materialMap.forEach(
                     (material, cm_item) -> {
-                        form.button(cm_item.getItemDisplayName(),FormImage.of(cm_item.getFormImage_type(),cm_item.getFormImage_data()));
+                        try {
+                            form.button(cm_item.getItemDisplayName(),FormImage.of(cm_item.getFormImage_type(),cm_item.getFormImage_data()));
+                        } catch (Exception e) {
+                            form.button(cm_item.getItemDisplayName());
+                        }
                         cm_itemMap.put(cm_item.getItemDisplayName(),cm_item);
                     }
             );

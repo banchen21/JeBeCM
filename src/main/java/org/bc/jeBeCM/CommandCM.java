@@ -47,7 +47,12 @@ public class CommandCM implements Listener, CommandExecutor {
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!player.getInventory().contains(Material.CLOCK)) {
-            player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
+//            检车玩家背包是否足有空间
+            if (player.getInventory().firstEmpty() == -1) {
+                player.sendMessage("你的背包已满，无法添加钟表");
+            }else {
+                player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
+            }
         }
     }
 
