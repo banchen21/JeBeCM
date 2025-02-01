@@ -1,5 +1,7 @@
 package org.bc.jeBeCM;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+
 public class CmItem {
     //    选项名
     String itemDisplayName;

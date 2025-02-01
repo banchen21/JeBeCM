@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -19,8 +20,11 @@ public class CommandCM implements Listener {
 
     String main_path;
 
-    public CommandCM(String path) {
+    public CommandCM(JeBeCM jeBeCM, String path) {
         this.main_path = path;
+        jeBeCM.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(CommandCM.createCommand("cm", jeBeCM, jeBeCM.getDataFolder().getPath()), "钟表菜单");
+        });
     }
 
     public static LiteralCommandNode<CommandSourceStack> createCommand(final String commandName,JeBeCM jeBeCM,final String main_path) {

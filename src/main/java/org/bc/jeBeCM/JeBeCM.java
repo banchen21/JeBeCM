@@ -19,15 +19,7 @@ import java.util.ResourceBundle;
 
 public final class JeBeCM extends JavaPlugin implements Listener {
     public static final String LANG_MESSAGES = "lang.messages";
-    public HashMap<Player, Map<Material, CmItem>> playerMapMap;
     private static Locale locale = Locale.CHINA;
-    public Map<Player, Map<Material, CmItem>> getPlayerMapMap() {
-        return this.playerMapMap;
-    }
-
-    public void setPlayerMapMap(Player player, Map<Material, CmItem> materialMap) {
-        this.playerMapMap.put(player, materialMap);
-    }
 
     @Override
     public void onEnable() {
@@ -48,12 +40,9 @@ public final class JeBeCM extends JavaPlugin implements Listener {
             getLogger().warning("PlaceholderAPI 没有被加载，插件将不会工作！");
             Bukkit.getPluginManager().disablePlugin(this);
         }
-        getServer().getPluginManager().registerEvents(new CommandCM(getDataFolder().getPath()), this);
-        playerMapMap = new HashMap<>();
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register(CommandCM.createCommand("cm", this, this.getDataFolder().getPath()), "钟表菜单");
-        });
-        getServer().getPluginManager().registerEvents(new CommmandListener(this), this);
+        getServer().getPluginManager().registerEvents(new CommandCM(this,getDataFolder().getPath()), this);
+        getServer().getPluginManager().registerEvents(new CmInventory(this), this);
+
     }
 
     private void setupTranslations(@Nullable String language) {

@@ -1,8 +1,12 @@
 package org.bc.jeBeCM;
 
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -10,46 +14,245 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.bc.jeBeCM.CmSerializerUtil.read_json_to_list;
 
-public class CmInventory implements InventoryHolder {
-    private final Inventory inventory;
+public class CmInventory implements InventoryHolder, Listener {
+
+    // 原有字段
+    private JeBeCM plugin;
+    private @NotNull Inventory inventory;
+    private LinkedHashMap<Material, CmItem> materialMap;
+    // 新增字段
+    private int currentPage;
+    private int totalPages;
+    private List<Material> materials;
+    private String path_file;
+    private String title;
+    private int itemsPerPage; // 动态计算每页容量
+    private int middleRows;   // 中间区域行数（1-4）
+    static HashMap<UUID, Map<Material, CmItem>> playerMapMap;
+
+    public CmInventory(JeBeCM plugin) {
+        this.plugin = plugin;
+        this.playerMapMap = new HashMap<>();
+    }
 
     public CmInventory(JeBeCM plugin, Player player, String path_file, String title) {
-        Map<Material, CmItem> materialMap = null;
+        this(plugin, player, path_file, title, 0); // 默认第一页
+    }
+
+    public CmInventory(JeBeCM plugin, Player player, String path_file, String title, int currentPage) {
+        this.plugin = plugin;
+        this.path_file = path_file;
+        this.title = title;
+
+        // 读取物品数据
         try {
             materialMap = read_json_to_list(path_file);
+            playerMapMap.put(player.getUniqueId(), materialMap);
         } catch (IOException e) {
-            player.sendMessage(plugin.getLocalizedMessage("error.path")+path_file);
+            player.sendMessage("§c配置文件读取错误: " + path_file);
+            return;
         }
-        plugin.setPlayerMapMap(player,materialMap );
-        Inventory inventory;
-        if (materialMap.size() % 9 == 0) {
-            inventory = plugin.getServer().createInventory(player, materialMap.size() / 9 * 9, title);
+
+        materials = new ArrayList<>(materialMap.keySet());
+
+        // 动态计算中间区域行数（基于总物品数量）
+        int totalItems = materials.size();
+        this.middleRows = calculateMiddleRows(totalItems);
+        this.itemsPerPage = middleRows * 9; // 每页容量 = 行数×9
+
+        // 计算总页数
+        this.totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+        this.currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
+        this.inventory = createDynamicInventory(player);
+        // 创建动态大小的库存
+    }
+    // 根据总物品数量计算需要的中间行数（1-4行）
+    private int calculateMiddleRows(int totalItems) {
+        if (totalItems <= 9)  return 1;
+        if (totalItems <= 18) return 2;
+        if (totalItems <= 27) return 3;
+        return 4; // 最多4行36格
+    }
+
+    // 构建带占位符替换的物品
+    private ItemStack buildItem(Player player, Material mat, CmItem cmItem) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(PlaceholderAPI.setPlaceholders(player, cmItem.getItemDisplayName()));
+
+        List<String> lore =new ArrayList<>();
+        lore.add(PlaceholderAPI.setPlaceholders(player, cmItem.getItemDescription()));
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    // 创建动态大小的库存
+    private Inventory createDynamicInventory(Player player) {
+        int totalRows = 2 + middleRows; // 顶1 + 中间n + 底1
+
+        Inventory inv = Bukkit.createInventory(this, totalRows * 9, title);
+
+        // 填充顶部蓝色玻璃
+        ItemStack glass = createGlassPane();
+        for (int i = 0; i < 9; i++) {
+            inv.setItem(i, glass);
+        }
+
+        // 填充中间物品
+        int startIndex = currentPage * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, materials.size());
+        int slot = 9; // 中间区域起始槽位（顶行之后）
+
+        for (int i = startIndex; i < endIndex; i++) {
+            Material mat = materials.get(i);
+            CmItem cmItem = materialMap.get(mat);
+            ItemStack item = buildItem(player, mat, cmItem);
+            inv.setItem(slot++, item);
+        }
+
+        // 填充底部栏（包括翻页按钮）
+        int bottomRowStart = (totalRows - 1) * 9; // 底部栏起始槽位
+        for (int i = 0; i < 9; i++) {
+            inv.setItem(bottomRowStart + i, glass);
+        }
+
+        // 添加翻页按钮
+        if (currentPage > 0) {
+            ItemStack prev = buildNavigationButton("上一页", Material.ARROW);
+            inv.setItem(bottomRowStart, prev); // 底部栏第一个槽位
+        }
+
+        if (currentPage < totalPages - 1) {
+            ItemStack next = buildNavigationButton("下一页", Material.ARROW);
+            inv.setItem(bottomRowStart + 8, next); // 底部栏最后一个槽位
+        }
+
+        // 页码显示在底部中间
+        ItemStack pageInfo = buildPageInfo();
+        inv.setItem(bottomRowStart + 4, pageInfo);
+
+        return inv;
+    }
+
+    // 创建翻页按钮
+    private ItemStack buildNavigationButton(String name, Material material) {
+        ItemStack button = new ItemStack(material);
+        ItemMeta meta = button.getItemMeta();
+        meta.setDisplayName(name);
+        button.setItemMeta(meta);
+        return button;
+    }
+
+    // 创建页码信息物品
+    private ItemStack buildPageInfo() {
+        ItemStack page = new ItemStack(Material.PAPER);
+        ItemMeta meta = page.getItemMeta();
+        meta.setDisplayName("§e第 " + (currentPage + 1) + " 页 / 共 " + totalPages + " 页");
+        page.setItemMeta(meta);
+        return page;
+    }
+
+    // 统一创建玻璃板
+    private ItemStack createGlassPane() {
+        ItemStack glass = new ItemStack(Material.BLUE_STAINED_GLASS_PANE);
+        ItemMeta meta = glass.getItemMeta();
+        meta.setDisplayName(" ");
+        glass.setItemMeta(meta);
+        return glass;
+    }
+    // 修改点击事件处理
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!(event.getInventory().getHolder() instanceof CmInventory)) return;
+        event.setCancelled(true);
+
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked == null) return;
+
+        CmInventory holder = (CmInventory) event.getClickedInventory().getHolder();
+
+        // 处理翻页点击
+        if (clicked.getType() == Material.ARROW) {
+            int newPage = holder.currentPage;
+            String displayName = clicked.getItemMeta().getDisplayName();
+
+            if (displayName.equals("上一页") && holder.currentPage > 0) {
+                newPage--;
+            } else if (displayName.equals("下一页") && holder.currentPage < holder.totalPages - 1) {
+                newPage++;
+            }
+
+            if (newPage != holder.currentPage) {
+                CmInventory newInventory = new CmInventory(holder.plugin, player, holder.path_file, holder.title, newPage);
+                player.openInventory(newInventory.getInventory());
+            }
         } else {
-            inventory = plugin.getServer().createInventory(player, materialMap.size() / 9 * 9 + 9, title);
+            // 原有物品点击处理
+            holder.click_item(clicked, player);
         }
-        for (Map.Entry<Material, CmItem> material : materialMap.entrySet()) {
-            ItemStack itemStack = new ItemStack(material.getKey(), 1);
-            ItemMeta meta = itemStack.getItemMeta();
-
-            meta.setDisplayName(PlaceholderAPI.setPlaceholders(player, material.getValue().getItemDisplayName()));
-            itemStack.setItemMeta(meta);
-
-            List<String> lore = new ArrayList<>();
-
-            String lore_text =PlaceholderAPI.setPlaceholders(player, material.getValue().getItemCommand()) ;
-            lore.add(lore_text);
-            itemStack.setLore(lore);
-
-            inventory.addItem(itemStack);
+    }
+    void click_item(ItemStack itemStack, Player player) {
+        Material material = itemStack.getType();
+        CmItem cmItem = playerMapMap.get(player.getUniqueId()).get(material);
+        if (cmItem == null) {
+            return;
         }
+        String commandText = PlaceholderAPI.setPlaceholders(player, cmItem.getItemCommand());
+        String path = plugin.getDataFolder().getPath() + "/" + cmItem.getItemCommand();
+        player.closeInventory();
+        switch (cmItem.getItemType()) {
+            case COMMAND:
+                player.performCommand(commandText);
+                break;
+            case OP_COMMAND:
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandText);
+                break;
+            case TELL:
+                player.sendMessage(commandText);
+                break;
+            case OP_FORM:
+                if (player.isOp()) {
+                    openinventory(player, path, cmItem);
+                } else {
+                    player.closeInventory();
+                    player.sendMessage(plugin.getLocalizedMessage("permission.no"));
+                }
+                break;
+            case FORM:
+                openinventory(player, path, cmItem);
+                break;
+            default:
+                player.closeInventory();
+                break;
+        }
+    }
 
-        this.inventory = inventory;
+    /**
+     * 打开子菜单界面：
+     * 关闭当前 Inventory，从指定路径读取新的物品数据，创建新的 CmInventory 后打开
+     */
+    void openinventory(Player player, String path, CmItem cmItem) {
+        player.closeInventory();
+        try {
+            LinkedHashMap<Material, CmItem> subMap = read_json_to_list(path);
+            if (subMap != null) {
+                CmInventory subMenu = new CmInventory(plugin, player, path, cmItem.getItemDisplayName());
+                player.openInventory(subMenu.getInventory());
+            } else {
+                player.sendMessage(plugin.getLocalizedMessage("error.format") + path);
+            }
+        } catch (IOException e) {
+            player.sendMessage(plugin.getLocalizedMessage("error.path") + path);
+        }
     }
 
     @Override

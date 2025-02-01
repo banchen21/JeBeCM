@@ -17,36 +17,36 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CmSerializerUtil {
 
 
 //     读取json文件获取菜单列表
-    public static Map<Material, CmItem> read_json_to_list(String pathname) throws IOException {
-            File file = new File(pathname);
-            if (file.exists()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                FileReader fileReader = new FileReader(file);
-                while (fileReader.ready()) {
-                    stringBuilder.append((char) fileReader.read());
-                }
-                fileReader.close();
+public static LinkedHashMap<Material, CmItem> read_json_to_list(String pathname) throws IOException {
+    File file = new File(pathname);
+    if (!file.exists()) return null;
 
-                Gson gson1 = new GsonBuilder()
-                        .registerTypeAdapter(new TypeToken<Map<Material, CmItem>>() {
-                        }.getType(), new MaterialMapDeserializer())
-                        .create();
-                return gson1.fromJson(stringBuilder.toString(), new TypeToken<Map<Material, CmItem>>() {
-                }.getType());
-            } else {
-                return null;
-            }
+    StringBuilder stringBuilder = new StringBuilder();
+    FileReader fileReader = new FileReader(file);
+    while (fileReader.ready()) {
+        stringBuilder.append((char) fileReader.read());
     }
+    fileReader.close();
+
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(new TypeToken<LinkedHashMap<Material, CmItem>>() {}.getType(), new MaterialMapDeserializer())
+            .create();
+    Map<Material, CmItem> tempMap = gson.fromJson(stringBuilder.toString(), new TypeToken<Map<Material, CmItem>>() {}.getType());
+
+    // **转换为 `LinkedHashMap` 以保持顺序**
+    return new LinkedHashMap<>(tempMap);
+}
 
     //    FloodgatePlayer 创建form菜单
     public static void create_form_ui(JeBeCM plugin,Player player, String main_path,String title) {
-        Map<Material, CmItem> materialMap = null;
+        LinkedHashMap<Material, CmItem> materialMap = null;
         try {
             materialMap = read_json_to_list(main_path);
         } catch (IOException e) {
