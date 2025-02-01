@@ -1,12 +1,14 @@
 package org.bc.jeBeCM;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+//import com.mojang.brigadier.Command;
+//import com.mojang.brigadier.tree.LiteralCommandNode;
+//import io.papermc.paper.command.brigadier.CommandSourceStack;
+//import io.papermc.paper.command.brigadier.Commands;
+//import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,40 +16,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
-public class CommandCM implements Listener {
+public class CommandCM implements Listener, CommandExecutor {
 
     String main_path;
+    JeBeCM plugin;
 
     public CommandCM(JeBeCM jeBeCM, String path) {
         this.main_path = path;
-        jeBeCM.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
-            commands.registrar().register(CommandCM.createCommand("cm", jeBeCM, jeBeCM.getDataFolder().getPath()), "钟表菜单");
-        });
-    }
-
-    public static LiteralCommandNode<CommandSourceStack> createCommand(final String commandName,JeBeCM jeBeCM,final String main_path) {
-        return Commands.literal(commandName)
-                .then(Commands.literal("help").executes(ctx -> {
-                    String name = ctx.getSource().getSender().getName();
-                    final CommandSender sender = ctx.getSource().getSender();
-                    Player player = sender.getServer().getPlayer(name);
-                    if (player == null) {
-                        sender.sendMessage("请在游戏内以玩家的身份进行操作");
-                        return Command.SINGLE_SUCCESS;
-                    }
-                    FloodgatePlayer floodgatePlayer = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
-                    if (floodgatePlayer == null) {
-//                        JE
-                        CmInventory cmInventory= new CmInventory(jeBeCM,player,main_path+"/main.json", "主菜单");
-                        player.openInventory(cmInventory.getInventory());
-                    } else {
-//                        BE
-                        CmSerializerUtil.create_form_ui(jeBeCM,player,main_path+"/main.json","主菜单");
-                    }
-                    return Command.SINGLE_SUCCESS;
-                })).build();
+        this.plugin = jeBeCM;
+        jeBeCM.getCommand("cm").setExecutor(this);
     }
 
     //    玩家右键钟表监听事件
@@ -68,5 +49,29 @@ public class CommandCM implements Listener {
         if (!player.getInventory().contains(Material.CLOCK)) {
             player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
         }
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+        // 命令执行逻辑
+        if (command.getName().equalsIgnoreCase("cm")&&strings[0].equals("help")) {
+            // 你的代码逻辑
+            Player player = sender.getServer().getPlayer(sender.getName());
+            if (player == null) {
+                sender.sendMessage("请在游戏内以玩家的身份进行操作");
+                return false;
+            }
+            FloodgatePlayer floodgatePlayer = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
+            if (floodgatePlayer == null) {
+//                        JE
+                CmInventory cmInventory= new CmInventory(this.plugin,player,main_path+"/main.json", "主菜单");
+                player.openInventory(cmInventory.getInventory());
+            } else {
+//                        BE
+                CmSerializerUtil.create_form_ui(this.plugin,player,main_path+"/main.json","主菜单");
+            }
+            return true;
+        }
+        return false;
     }
 }
