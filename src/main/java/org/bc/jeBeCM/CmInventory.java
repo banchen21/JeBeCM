@@ -32,6 +32,9 @@ public class CmInventory implements InventoryHolder, Listener {
     private String title;
     private int itemsPerPage; // 动态计算每页容量
     private int middleRows;   // 中间区域行数（1-4）
+
+//    页面数组
+    private static int[] PAGE_BUTTON_SLOTS;
     static HashMap<UUID, Map<Material, CmItem>> playerMapMap;
 
     public CmInventory(JeBeCM plugin) {
@@ -53,20 +56,17 @@ public class CmInventory implements InventoryHolder, Listener {
             materialMap = read_json_to_list(path_file);
             playerMapMap.put(player.getUniqueId(), materialMap);
         } catch (IOException e) {
-            player.sendMessage("§c配置文件读取错误: " + path_file);
+            player.sendMessage("§c配置文件错误: " + path_file);
             return;
         }
 
         materials = new ArrayList<>(materialMap.keySet());
-
-        // 动态计算中间区域行数（基于总物品数量）
-        int totalItems = materials.size();
-        this.middleRows = calculateMiddleRows(totalItems);
-        this.itemsPerPage = middleRows * 9; // 每页容量 = 行数×9
-
-        // 计算总页数
-        this.totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+        this.totalPages = calculateDynamicPages(materials.size());
         this.currentPage = Math.max(0, Math.min(currentPage, totalPages - 1));
+
+        // 动态计算当前页的行数
+        this.middleRows = calculateCurrentPageRows(materials.size(), currentPage);
+        this.itemsPerPage = middleRows * 9;
 
         this.inventory = createDynamicInventory(player);
         // 创建动态大小的库存
@@ -94,32 +94,64 @@ public class CmInventory implements InventoryHolder, Listener {
         return item;
     }
 
+    // 动态计算总页数
+    private int calculateDynamicPages(int totalItems) {
+        int pages = 0;
+        int remaining = totalItems;
+        while (remaining > 0) {
+            int rows = Math.min(4, (int) Math.ceil(remaining / 9.0));
+            remaining -= rows * 9;
+            pages++;
+        }
+        return pages;
+    }
+
+    // 计算指定页的行数
+    private int calculateCurrentPageRows(int totalItems, int page) {
+        int remaining = totalItems;
+        int currentPage = 0;
+        while (remaining > 0 && currentPage <= page) {
+            int rows = Math.min(4, (int) Math.ceil(remaining / 9.0));
+            if (currentPage == page) return rows;
+            remaining -= rows * 9;
+            currentPage++;
+        }
+        return 1; // 默认最少1行
+    }
+
     // 创建动态大小的库存
     private Inventory createDynamicInventory(Player player) {
-        int totalRows = 2 + middleRows; // 顶1 + 中间n + 底1
-
+        int totalRows = 2 + middleRows; // 顶1 + 中间动态行 + 底1
         Inventory inv = Bukkit.createInventory(this, totalRows * 9, title);
 
-        // 填充顶部蓝色玻璃
+        // 填充顶部玻璃
         ItemStack glass = createGlassPane();
         for (int i = 0; i < 9; i++) {
             inv.setItem(i, glass);
         }
 
-        // 填充中间物品
-        int startIndex = currentPage * itemsPerPage;
-        int endIndex = Math.min(startIndex + itemsPerPage, materials.size());
-        int slot = 9; // 中间区域起始槽位（顶行之后）
+        // 计算当前页的起始索引
+        int startIndex = 0;
+        int tempPage = 0;
+        int remaining = materials.size();
+        while (tempPage < currentPage && remaining > 0) {
+            int rows = Math.min(4, (int) Math.ceil(remaining / 9.0));
+            startIndex += rows * 9;
+            remaining -= rows * 9;
+            tempPage++;
+        }
 
+        // 填充当前页物品
+        int endIndex = Math.min(startIndex + (middleRows * 9), materials.size());
+        int slot = 9; // 中间区域起始槽位
         for (int i = startIndex; i < endIndex; i++) {
             Material mat = materials.get(i);
             CmItem cmItem = materialMap.get(mat);
-            ItemStack item = buildItem(player, mat, cmItem);
-            inv.setItem(slot++, item);
+            inv.setItem(slot++, buildItem(player, mat, cmItem));
         }
 
-        // 填充底部栏（包括翻页按钮）
-        int bottomRowStart = (totalRows - 1) * 9; // 底部栏起始槽位
+        // 填充底部栏
+        int bottomRowStart = (totalRows - 1) * 9;
         for (int i = 0; i < 9; i++) {
             inv.setItem(bottomRowStart + i, glass);
         }
