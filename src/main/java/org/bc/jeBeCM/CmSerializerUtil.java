@@ -14,7 +14,6 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,7 +40,6 @@ public static LinkedHashMap<Material, CmItem> read_json_to_list(String pathname)
             .create();
     Map<Material, CmItem> tempMap = gson.fromJson(stringBuilder.toString(), new TypeToken<Map<Material, CmItem>>() {}.getType());
 
-    // **转换为 `LinkedHashMap` 以保持顺序**
     return new LinkedHashMap<>(tempMap);
 }
 

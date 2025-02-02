@@ -1,10 +1,5 @@
 package org.bc.jeBeCM;
 
-//import com.mojang.brigadier.Command;
-//import com.mojang.brigadier.tree.LiteralCommandNode;
-//import io.papermc.paper.command.brigadier.CommandSourceStack;
-//import io.papermc.paper.command.brigadier.Commands;
-//import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -49,7 +44,7 @@ public class CommandCM implements Listener, CommandExecutor {
         if (!player.getInventory().contains(Material.CLOCK)) {
 //            检车玩家背包是否足有空间
             if (player.getInventory().firstEmpty() == -1) {
-                player.sendMessage("你的背包已满，无法添加钟表");
+                player.sendMessage( plugin.getLocalizedMessage("clock.full"));
             }else {
                 player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
             }
@@ -76,6 +71,8 @@ public class CommandCM implements Listener, CommandExecutor {
                 CmSerializerUtil.create_form_ui(this.plugin,player,main_path+"/main.json","主菜单");
             }
             return true;
+        }else {
+            sender.sendMessage( plugin.getLocalizedMessage("help.help"));
         }
         return false;
     }
