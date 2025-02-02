@@ -1,34 +1,52 @@
 {
   "DIAMOND": {
-    "itemDisplayName": "物品名",
-    "itemDescription": "点击设置时间为0",
+    "itemDisplayName": "向腐竹问好",
+    "itemDescription": "腐竹也会向你问好",
     "itemType": "TELL",
-    "itemCommand": "hi",
+    "itemCommand": "祝你玩得开心哟~",
     "FormImage_type": "url",
     "FormImage_data": "https://github.com/GeyserMC.png?size=200"
   },
   "END_STONE": {
-    "itemDisplayName": "管理员菜单",
-    "itemDescription": "点击设置时间为0",
+    "itemDisplayName": "§6§l⚙ 管理员菜单",
+    "itemDescription": "未开放功能",
     "itemType": "OP_FORM",
     "itemCommand": "op_menu.json",
     "FormImage_type": "path",
     "FormImage_data": "textures/i/glyph_world_template.png"
   },
   "STONE": {
-    "itemDisplayName": "我的家园",
-    "itemDescription": "点击设置时间为0",
+    "itemDisplayName": "§7 我的地皮",
+    "itemDescription": "未开放功能",
     "itemType": "FORM",
     "itemCommand": "main.json",
     "FormImage_type": "url",
     "FormImage_data": "https://github.com/GeyserMC.png?size=200"
   },
   "CLOCK": {
-    "itemDisplayName": "时间重置",
-    "itemDescription": "点击设置时间为0",
+    "itemDisplayName": "§e§l⏳ 时间重置",
+    "itemDescription": "§7点击§c重置时间§7为 §e0",
     "itemType": "COMMAND",
     "itemCommand": "time set 0",
     "FormImage_type": "url",
     "FormImage_data": "https://github.com/GeyserMC.png?size=200"
+  },
+  "BEACON":{
+    "itemDisplayName": "前往星际大厅",
+    "itemDescription": "点击回传到星际大厅",
+    "itemType": "COMMAND",
+    "itemCommand": "spawn",
+    "FormImage_type": "url",
+    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
+  },
+  "SUNFLOWER": {
+    "itemDisplayName": "§6§l☀ 天气变晴",
+    "itemDescription": "§7点击后，世界天气变为§e晴天",
+    "itemType": "COMMAND",
+    "itemCommand": "weather clear",
+    "FormImage": {
+      "type": "url",
+      "data": "https://github.com/GeyserMC.png?size=200"
+    }
   }
 }
