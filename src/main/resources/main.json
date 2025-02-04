@@ -1,52 +1,42 @@
 {
-  "DIAMOND": {
-    "itemDisplayName": "向腐竹问好",
-    "itemDescription": "腐竹也会向你问好",
-    "itemType": "TELL",
-    "itemCommand": "祝你玩得开心哟~",
-    "FormImage_type": "url",
-    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
-  },
-  "END_STONE": {
+  "REDSTONE_BLOCK": {
     "itemDisplayName": "§6§l⚙ 管理员菜单",
-    "itemDescription": "未开放功能",
+    "itemDescription": "§7▸状态：§7未开放",
     "itemType": "OP_FORM",
     "itemCommand": "op_menu.json",
     "FormImage_type": "path",
-    "FormImage_data": "textures/i/glyph_world_template.png"
+    "FormImage_data": "textures/blocks/redstone_block.png"
   },
-  "STONE": {
-    "itemDisplayName": "§7 我的地皮",
-    "itemDescription": "未开放功能",
-    "itemType": "FORM",
-    "itemCommand": "main.json",
-    "FormImage_type": "url",
-    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
-  },
-  "CLOCK": {
-    "itemDisplayName": "§e§l⏳ 时间重置",
-    "itemDescription": "§7点击§c重置时间§7为 §e0",
+  "DIAMOND": {
+    "itemDisplayName": "§6§l💱 兑换花币",
+    "itemDescription": "§d1 钻石 ≈ 200 花币 §8| §b单向兑换",
     "itemType": "COMMAND",
-    "itemCommand": "time set 0",
-    "FormImage_type": "url",
-    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
+    "itemCommand": "exchange 1",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/items/diamond.png"
   },
-  "BEACON":{
-    "itemDisplayName": "前往星际大厅",
+  "GRASS_BLOCK": {
+    "itemDisplayName": "§e§l✨ 星界地块",
+    "itemDescription": "§7▸状态：§a正常运营",
+    "itemType": "FORM",
+    "itemCommand": "plot.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/grass_block_snow.png"
+  },
+  "BOOK":{
+    "itemDisplayName": "§b✦ §e指南手册 §b✦",
+    "itemDescription": "§7▶ §f点击打开手册！§7❖",
+    "itemType": "FORM",
+    "itemCommand": "reeworld.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/items/book_normal.png"
+  },
+  "BEACON": {
+    "itemDisplayName": "§b前往星际大厅",
     "itemDescription": "点击回传到星际大厅",
     "itemType": "COMMAND",
     "itemCommand": "spawn",
-    "FormImage_type": "url",
-    "FormImage_data": "https://github.com/GeyserMC.png?size=200"
-  },
-  "SUNFLOWER": {
-    "itemDisplayName": "§6§l☀ 天气变晴",
-    "itemDescription": "§7点击后，世界天气变为§e晴天",
-    "itemType": "COMMAND",
-    "itemCommand": "weather clear",
-    "FormImage": {
-      "type": "url",
-      "data": "https://github.com/GeyserMC.png?size=200"
-    }
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/beacon.png"
   }
 }

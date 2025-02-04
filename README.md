@@ -9,35 +9,45 @@
 # 示例参考：
 ```json
 {
-  "DIAMOND": {
-    "itemDisplayName": "物品名",
-    "itemDescription": "点击设置时间为0",
-    "itemType": "TELL",
-    "itemCommand": "hi"
-  },
-  "END_STONE": {
-    "itemDisplayName": "管理员菜单",
-    "itemDescription": "点击设置时间为0",
+  "REDSTONE_BLOCK": {
+    "itemDisplayName": "§6§l⚙ 管理员菜单",
+    "itemDescription": "§7▸状态：§7未开放",
     "itemType": "OP_FORM",
-    "itemCommand": "op_menu.json"
+    "itemCommand": "op_menu.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/redstone_block.png"
   },
-  "STONE": {
-    "itemDisplayName": "我的家园",
-    "itemDescription": "点击设置时间为0",
-    "itemType": "FORM",
-    "itemCommand": "main.json"
-  },
-  "CLOCK": {
-    "itemDisplayName": "时间重置",
-    "itemDescription": "点击设置时间为0",
+  "DIAMOND": {
+    "itemDisplayName": "§6§l💱 兑换花币",
+    "itemDescription": "§d1 钻石 ≈ 200 花币 §8| §b单向兑换",
     "itemType": "COMMAND",
-    "itemCommand": "time set 0"
+    "itemCommand": "exchange 1",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/items/diamond.png"
   },
-  "CLOCK": {
-    "itemDisplayName": "时间重置",
-    "itemDescription": "点击设置时间为0",
-    "itemType": "OP_COMMAND",
-    "itemCommand": "time set 0"
+  "GRASS_BLOCK": {
+    "itemDisplayName": "§e§l✨ 星界地块",
+    "itemDescription": "§7▸状态：§a正常运营",
+    "itemType": "FORM",
+    "itemCommand": "plot.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/grass_block_snow.png"
+  },
+  "BOOK":{
+    "itemDisplayName": "§b✦ §e指南手册 §b✦",
+    "itemDescription": "§7▶ §f点击打开手册！§7❖",
+    "itemType": "FORM",
+    "itemCommand": "reeworld.json",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/items/book_normal.png"
+  },
+  "BEACON": {
+    "itemDisplayName": "§b前往星际大厅",
+    "itemDescription": "点击回传到星际大厅",
+    "itemType": "COMMAND",
+    "itemCommand": "spawn",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/beacon.png"
   }
 }
 ```
