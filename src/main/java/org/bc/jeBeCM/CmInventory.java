@@ -30,7 +30,6 @@ public class CmInventory implements InventoryHolder, Listener {
     private List<Material> materials;
     private String path_file;
     private String title;
-    private int itemsPerPage; // 动态计算每页容量
     private int middleRows;   // 中间区域行数（1-4）
 
 //    页面数组
@@ -66,17 +65,9 @@ public class CmInventory implements InventoryHolder, Listener {
 
         // 动态计算当前页的行数
         this.middleRows = calculateCurrentPageRows(materials.size(), currentPage);
-        this.itemsPerPage = middleRows * 9;
 
         this.inventory = createDynamicInventory(player);
         // 创建动态大小的库存
-    }
-    // 根据总物品数量计算需要的中间行数（1-4行）
-    private int calculateMiddleRows(int totalItems) {
-        if (totalItems <= 9)  return 1;
-        if (totalItems <= 18) return 2;
-        if (totalItems <= 27) return 3;
-        return 4; // 最多4行36格
     }
 
     // 构建带占位符替换的物品
