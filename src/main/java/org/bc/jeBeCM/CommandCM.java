@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,29 +24,32 @@ public class CommandCM implements Listener, CommandExecutor {
     public CommandCM(JeBeCM jeBeCM, String path) {
         this.main_path = path;
         this.plugin = jeBeCM;
-        jeBeCM.getCommand("cm").setExecutor(this);
+        PluginCommand pluginCommand = jeBeCM.getCommand("cm");
+        if (pluginCommand != null) {
+            pluginCommand.setExecutor(this);
+        }
     }
 
     //    玩家右键钟表监听事件
     @EventHandler
     public void onPlayerRightClick(PlayerInteractEvent event) {
         try {
-            if (Objects.requireNonNull(event.getItem()).getType().equals(Material.CLOCK)&&event.getAction().isRightClick()) {
+            if (Objects.requireNonNull(event.getItem()).getType().equals(Material.CLOCK) && event.getAction().isRightClick()) {
                 Bukkit.dispatchCommand(event.getPlayer(), "cm help");
             }
-            } catch (NullPointerException ignored) {
+        } catch (NullPointerException ignored) {
         }
     }
 
-//    监听玩家进入服务器
+    //    监听玩家进入服务器
     @EventHandler
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!player.getInventory().contains(Material.CLOCK)) {
 //            检车玩家背包是否足有空间
             if (player.getInventory().firstEmpty() == -1) {
-                player.sendMessage( plugin.getLocalizedMessage("clock.full"));
-            }else {
+                player.sendMessage(JeBeCM.getLocalizedMessage("clock.full"));
+            } else {
                 player.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.CLOCK));
             }
         }
@@ -54,7 +58,7 @@ public class CommandCM implements Listener, CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         // 命令执行逻辑
-        if (command.getName().equalsIgnoreCase("cm")&&strings[0].equals("help")) {
+        if (command.getName().equalsIgnoreCase("cm") && strings[0].equals("help")) {
             // 你的代码逻辑
             Player player = sender.getServer().getPlayer(sender.getName());
             if (player == null) {
@@ -64,15 +68,15 @@ public class CommandCM implements Listener, CommandExecutor {
             FloodgatePlayer floodgatePlayer = FloodgateApi.getInstance().getPlayer(player.getUniqueId());
             if (floodgatePlayer == null) {
 //                        JE
-                CmInventory cmInventory= new CmInventory(this.plugin,player,main_path+"/main.json", "主菜单");
+                CmInventory cmInventory = new CmInventory(this.plugin, player, main_path + "/main.json", "主菜单");
                 player.openInventory(cmInventory.getInventory());
             } else {
 //                        BE
-                CmSerializerUtil.create_form_ui(this.plugin,player,main_path+"/main.json","主菜单");
+                CmSerializerUtil.create_form_ui(this.plugin, player, main_path + "/main.json", "主菜单");
             }
             return true;
-        }else {
-            sender.sendMessage( plugin.getLocalizedMessage("help.help"));
+        } else {
+            sender.sendMessage(JeBeCM.getLocalizedMessage("help.help"));
         }
         return false;
     }

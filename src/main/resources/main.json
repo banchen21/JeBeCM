@@ -23,7 +23,7 @@
     "FormImage_type": "path",
     "FormImage_data": "textures/blocks/grass_block_snow.png"
   },
-  "BOOK":{
+  "BOOK": {
     "itemDisplayName": "§b✦ §e指南手册 §b✦",
     "itemDescription": "§7▶ §f点击打开手册！§7❖",
     "itemType": "FORM",
@@ -36,6 +36,14 @@
     "itemDescription": "点击回传到星际大厅",
     "itemType": "COMMAND",
     "itemCommand": "spawn",
+    "FormImage_type": "path",
+    "FormImage_data": "textures/blocks/beacon.png"
+  },
+  "MY_PAWN_SLOT": {
+    "itemDisplayName": "商店相同",
+    "itemDescription": "点击打开",
+    "itemType": "COMMAND",
+    "itemCommand": "shop gui",
     "FormImage_type": "path",
     "FormImage_data": "textures/blocks/beacon.png"
   }
